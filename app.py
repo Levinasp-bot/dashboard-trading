@@ -21,33 +21,28 @@ def get_crypto_data(symbol, interval='1d', limit=1000):
 
     try:
         response = requests.get(url, params=params, timeout=10, verify=certifi.where())
-        response.raise_for_status()  # Naikkan exception kalau status bukan 200
         data = response.json()
-        if not isinstance(data, list):
-            st.error(f"API error: {data.get('msg', 'Unknown error')}")
-            return pd.DataFrame()
-
-        if not data:
-            return pd.DataFrame()  
-
-        df = pd.DataFrame(data, columns=[
-            "Open Time", "Open", "High", "Low", "Close", "Volume",
-            "Close Time", "Quote Asset Volume", "Number of Trades",
-            "Taker Buy Base Asset Volume", "Taker Buy Quote Asset Volume", "Ignore"
-        ])
-        df["Open Time"] = pd.to_datetime(df["Open Time"], unit='ms')
-        df["Close Time"] = pd.to_datetime(df["Close Time"], unit='ms')
-        numeric_columns = ["Open", "High", "Low", "Close", "Volume"]
-        df[numeric_columns] = df[numeric_columns].astype(float)
-
-        return df
-
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Request error: {e}")
-        return pd.DataFrame()
     except Exception as e:
-        print(f"❌ Error saat memproses data crypto: {e}")
+        st.error(f"Gagal ambil data: {e}")
         return pd.DataFrame()
+
+    # ✅ Cek apakah data list (berarti valid)
+    if not isinstance(data, list):
+        st.error(f"API error: {data.get('msg', 'Data tidak valid')}")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(data, columns=[
+        "Open Time", "Open", "High", "Low", "Close", "Volume",
+        "Close Time", "Quote Asset Volume", "Number of Trades",
+        "Taker Buy Base Asset Volume", "Taker Buy Quote Asset Volume", "Ignore"
+    ])
+    df["Open Time"] = pd.to_datetime(df["Open Time"], unit='ms', utc=True)
+    df["Close Time"] = pd.to_datetime(df["Close Time"], unit='ms', utc=True)
+    numeric_columns = ["Open", "High", "Low", "Close", "Volume", "Number of Trades"]
+    df[numeric_columns] = df[numeric_columns].astype(float)
+
+    return df
+
 
 # ======================== PROSES UNTUK DATA SAHAM ========================
 if asset_type == "Saham":
