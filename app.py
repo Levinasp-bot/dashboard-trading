@@ -199,11 +199,14 @@ elif asset_type == "Cryptocurrency":
     min_date = df_crypto["Open Time"].min()
     max_date = df_crypto["Open Time"].max()
 
+    min_date = pd.to_datetime(min_date).to_pydatetime()
+    max_date = pd.to_datetime(max_date).to_pydatetime()
+
     start_date, end_date = st.sidebar.slider(
         "Pilih Rentang Tanggal",
-        min_value=min_date.to_pydatetime(),
-        max_value=max_date.to_pydatetime(),
-        value=(min_date.to_pydatetime(), max_date.to_pydatetime())
+        min_value=min_date,
+        max_value=max_date,
+        value=(min_date, max_date)
     )
 
     df_filtered = df_crypto[(df_crypto["Open Time"] >= start_date) & (df_crypto["Open Time"] <= end_date)].copy()
