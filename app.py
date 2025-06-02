@@ -27,7 +27,6 @@ def get_crypto_data(symbol, interval='1d', limit=1000):
         "Close Time", "Quote Asset Volume", "Number of Trades",
         "Taker Buy Base Asset Volume", "Taker Buy Quote Asset Volume", "Ignore"
     ])
-
     df["Open Time"] = pd.to_datetime(df["Open Time"], unit='ms')
     df["Close Time"] = pd.to_datetime(df["Close Time"], unit='ms')
     numeric_columns = ["Open", "High", "Low", "Close", "Volume"]
