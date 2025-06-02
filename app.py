@@ -23,9 +23,12 @@ def get_crypto_data(symbol, interval='1d', limit=1000):
         response = requests.get(url, params=params, timeout=10, verify=certifi.where())
         response.raise_for_status()  # Naikkan exception kalau status bukan 200
         data = response.json()
+        if not isinstance(data, list):
+            st.error(f"API error: {data.get('msg', 'Unknown error')}")
+            return pd.DataFrame()
 
         if not data:
-            return pd.DataFrame()  # Kembalikan DataFrame kosong kalau data kosong
+            return pd.DataFrame()  
 
         df = pd.DataFrame(data, columns=[
             "Open Time", "Open", "High", "Low", "Close", "Volume",
@@ -194,23 +197,6 @@ elif asset_type == "Cryptocurrency":
     width="100%" height="500" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
     """
     st.markdown(tv_embed_code, unsafe_allow_html=True)
-
-    # ------------------- setelah memanggil get_crypto_data -------------------
-    expected_cols = {
-        "Open Time", "Open", "High", "Low", "Close", "Volume",
-        "Close Time", "Quote Asset Volume", "Number of Trades"
-    }
-
-    if df_crypto.empty:
-        st.error("❌ Data crypto kosong – kemungkinan Binance API timeout / rate-limit.")
-        st.stop()
-
-    if not expected_cols.issubset(df_crypto.columns):
-        st.error("❌ Struktur data dari Binance tidak valid.\n"
-                "Coba pilih koin/timeframe lain atau refresh nanti.")
-        st.write("Response Binance (debug):", df_crypto.head())  # opsional
-        st.stop()
-    # -------------------------------------------------------------------------
 
     # Hitung Frequency Analyzer
     df_crypto["Frequency Analyzer"] = (df_crypto["Volume"] / df_crypto["Number of Trades"]) ** 3
