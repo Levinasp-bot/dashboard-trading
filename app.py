@@ -11,29 +11,6 @@ st.set_page_config(layout="wide")
 st.sidebar.title("📌 Pilih Aset")
 asset_type = st.sidebar.selectbox("Pilih Jenis Aset", ["Saham", "Cryptocurrency"])
 
-# ======================== FUNGSI UNTUK DATA CRYPTO ========================
-def get_crypto_data(symbol, interval='1d', limit=1000):
-    url = "https://api.binance.com/api/v3/klines"
-    params = {
-        "symbol": symbol,
-        "interval": interval,
-        "limit": limit
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-
-    df = pd.DataFrame(data, columns=[
-        "Open Time", "Open", "High", "Low", "Close", "Volume",
-        "Close Time", "Quote Asset Volume", "Number of Trades",
-        "Taker Buy Base Asset Volume", "Taker Buy Quote Asset Volume", "Ignore"
-    ])
-    df["Open Time"] = pd.to_datetime(df["Open Time"], unit='ms')
-    df["Close Time"] = pd.to_datetime(df["Close Time"], unit='ms')
-    numeric_columns = ["Open", "High", "Low", "Close", "Volume"]
-    df[numeric_columns] = df[numeric_columns].astype(float)
-
-    return df
-
 # ======================== PROSES UNTUK DATA SAHAM ========================
 if asset_type == "Saham":
     folder_path = "data saham/"
@@ -246,25 +223,23 @@ elif asset_type == "Cryptocurrency":
     st.plotly_chart(fig_analyzer, use_container_width=True)
 
 def get_crypto_data(symbol, interval='1d', limit=1000):
-    response = requests.get(url, params=params, timeout=10, verify=certifi.where())
-    url = f"https://api.binance.com/api/v3/klines"
+    url = "https://api.binance.com/api/v3/klines"
     params = {
         "symbol": symbol,
         "interval": interval,
         "limit": limit
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=10, verify=certifi.where())
     data = response.json()
-    
+
     df = pd.DataFrame(data, columns=[
         "Open Time", "Open", "High", "Low", "Close", "Volume",
         "Close Time", "Quote Asset Volume", "Number of Trades",
         "Taker Buy Base Asset Volume", "Taker Buy Quote Asset Volume", "Ignore"
     ])
-    
     df["Open Time"] = pd.to_datetime(df["Open Time"], unit='ms')
     df["Close Time"] = pd.to_datetime(df["Close Time"], unit='ms')
     numeric_columns = ["Open", "High", "Low", "Close", "Volume"]
     df[numeric_columns] = df[numeric_columns].astype(float)
-    
+
     return df
